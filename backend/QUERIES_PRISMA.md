@@ -11,8 +11,6 @@ model Task {
   description String?
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
 }
 ```
 
@@ -23,15 +21,11 @@ model Task {
 **Localização:** `backend/src/models/tarefaModel.js`
 
 ```javascript
-export async function criarTask(title, description = null, categoryId = null) {
+export async function criarTask(title, description = null) {
   const novaTask = await prisma.task.create({
     data: {
       title: title.trim(),
-      description: description ? description.trim() : null,
-      categoryId: categoryId
-    },
-    include: {
-      category: true
+      description: description ? description.trim() : null
     }
   });
 
@@ -46,15 +40,11 @@ export async function criarTask(title, description = null, categoryId = null) {
 ```javascript
 export async function criarTaskPrisma(req, res) {
   try {
-    const { title, description, categoryId } = req.body;
+    const { title, description } = req.body;
 
     // Validações...
 
-    const taskCriada = await TarefaModel.criarTask(
-      title,
-      description,
-      categoryId
-    );
+    const taskCriada = await TarefaModel.criarTask(title, description);
 
     res.status(201).json({
       mensagem: "Task criada com sucesso!",
@@ -75,8 +65,7 @@ export async function criarTaskPrisma(req, res) {
 ```json
 {
   "title": "Título da tarefa",
-  "description": "Descrição opcional",
-  "categoryId": 1
+  "description": "Descrição opcional"
 }
 ```
 
@@ -90,12 +79,7 @@ export async function criarTaskPrisma(req, res) {
     "title": "Título da tarefa",
     "description": "Descrição opcional",
     "completed": false,
-    "createdAt": "2026-05-11T12:00:00.000Z",
-    "categoryId": 1,
-    "category": {
-      "id": 1,
-      "name": "Categoria"
-    }
+    "createdAt": "2026-05-11T12:00:00.000Z"
   }
 }
 ```
@@ -112,9 +96,6 @@ export async function excluirTask(id) {
     const taskRemovida = await prisma.task.delete({
       where: {
         id: id
-      },
-      include: {
-        category: true
       }
     });
 
@@ -174,12 +155,7 @@ export async function excluirTaskPrisma(req, res) {
     "title": "Título da tarefa",
     "description": "Descrição opcional",
     "completed": false,
-    "createdAt": "2026-05-11T12:00:00.000Z",
-    "categoryId": 1,
-    "category": {
-      "id": 1,
-      "name": "Categoria"
-    }
+    "createdAt": "2026-05-11T12:00:00.000Z"
   }
 }
 ```
@@ -201,8 +177,7 @@ curl -X POST http://localhost:3000/tasks \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Estudar Node.js",
-    "description": "Aprender sobre Prisma ORM",
-    "categoryId": 1
+    "description": "Aprender sobre Prisma ORM"
   }'
 ```
 
@@ -218,7 +193,6 @@ curl -X DELETE http://localhost:3000/tasks/1
 
 - ✅ `title` é obrigatório e deve ser uma string não vazia
 - ✅ `description` é opcional e deve ser uma string (se fornecida)
-- ✅ `categoryId` é opcional e deve ser um número inteiro (se fornecido)
 - ✅ Tratamento de erros com try-catch
 
 ### Exclusão (DELETE)
@@ -231,7 +205,6 @@ curl -X DELETE http://localhost:3000/tasks/1
 ## Observações
 
 1. As queries Prisma retornam Promises, por isso os controllers são `async/await`
-2. A opção `include: { category: true }` traz os dados da categoria relacionada
-3. O campo `completed` tem valor padrão `false` definido no schema
-4. O campo `createdAt` é preenchido automaticamente com a data/hora atual
-5. Os endpoints `/tasks` usam Prisma, enquanto `/tarefas` usam o array em memória
+2. O campo `completed` tem valor padrão `false` definido no schema
+3. O campo `createdAt` é preenchido automaticamente com a data/hora atual
+4. Todos os dados são salvos no banco de dados usando Prisma ORM

@@ -50,7 +50,7 @@ MVC divide a aplicação em 3 componentes principais:
 
 **O que faz:**
 
-- Armazena dados (em memória, banco de dados, etc.)
+- Armazena dados (banco de dados usando Prisma)
 - Define a estrutura dos dados
 - Implementa regras de negócio
 - Realiza operações CRUD
@@ -245,9 +245,8 @@ app.use(express.static("views/public"));
    ↓
 
 6. Model processa:
-   - Gera novo ID
    - Cria objeto da tarefa
-   - Adiciona ao array
+   - Salva no banco de dados com Prisma
    - Retorna a tarefa criada
 
    ↓
